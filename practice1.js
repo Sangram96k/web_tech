@@ -41,19 +41,52 @@
 
 
 
-fetchdata(processdata);
-function fetchdata(callback){
+// fetchdata(processdata);
+// function fetchdata(callback){
   
-    setTimeout(()=>{
+//     setTimeout(()=>{
 
-        const data = "The data has been processed"
-        callback(data)
+//         const data = "The data has been processed"
+//         callback(data)
 
-    } ,3000 )
+//     } ,3000 )
 
+// }
+
+// function processdata(data)
+// {
+//     console.log(`Processing the data ${data}`);
+// }
+
+// fetchdata(processdata);
+
+
+
+
+
+
+// function sum(a,b)
+// {
+//     return a+b;
+
+// }
+// here we stored the reference of the ,method in the variable and 
+//  and if we check the type o fthe the sum1 variable it is function  so my conclusion is that if can
+// invoke or call the function using the teh sum1 variable like in he below example
+
+// let sum1 = sum;
+// console.log(typeof sum1)
+// console.log(sum1(1,2));
+
+// Returning function 
+
+function multiplier(factor){
+    return function(number)
+    {
+        return factor*number;
+    };
 }
-
-function processdata(data)
-{
-    console.log(`Processing the data ${data}`);
-}
+//  in the fact variabe the return function(number{.....}) is stored and when i invoked it and passed value
+//  like value(2)
+let fact = multiplier(5);
+console.log(fact(5));
