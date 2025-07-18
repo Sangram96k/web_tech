@@ -74,3 +74,5 @@ console.log(arr); // output [ 'vivek 'sangram', 1, 2, 3, 4, 5 ]
 
 ar.splice(1,2,"sangram");//removes elements incluinf the starting index and the count as 2 so index 1 and 2 element was deleted and insed and new elemnt was added
 console.log(ar);
+
+//JavaScript arrays come with many built-in methods. Each performs a common operation
