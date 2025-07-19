@@ -196,3 +196,117 @@ console.log(sum1);    //Dry Run:  acc value is 1  acc=1 and curent value is inde
                         //acc=acc+curr:4+3=7 acc =7
                         //acc=acc+curr:7+4=11 acc=11
                         //acc=acc+curr:11+5=16  and this is returened 
+// SORT():
+
+let arrnew = [1,5,6,3,2,4]
+let sorted = arrnew.sort();//sorts in accesding order
+//acending sort using lamda function
+let ascsort = arrnew.sort((a,b)=>a-b);
+console.log(ascsort);
+//in decending order
+let desending_ord = arrnew.sort((a,b)=>b-a);
+console.log(desending_ord)//[ 6, 5, 4, 3, 2, 1 ]\
+
+/**
+ INDEXOF
+ SYNTAX:indexOf(searchElement)
+   indexOf(searchElement, fromIndex)
+   BELOW ARE THE EXAMPLES
+
+
+ */
+
+   {//example for indexOf():
+    const arr = [1,2,3,4,,5,6,NaN,1,2,3,1]
+     let idx = arr.indexOf(2);
+     console.log(`The index of the element is ${idx}`);
+
+    //  You cannot use indexOf() to search for NaN
+    // .
+let arr1 = []
+console.log(arr.indexOf(NaN));  //returns -1
+// Finding all the occurrences of an element
+let ele = 1;
+let idx1 = arr.indexOf(ele);
+while (idx1!=-1) {
+    arr1.push(idx1);
+    idx1 = arr.indexOf(ele,idx1+1);
+}
+
+console.log(arr1.length)
+
+
+   }
+
+   {
+   /**
+    REVERSE():
+    The reverse() method transposes the elements of the calling array object in place, 
+    mutating the array, and returning a reference to the array.
+    SYNTAX:reverse()   IT DO NOT TAKE ANY PARAMETER
+    
+    RETURN VALUE:
+    The reference to the original array, now reversed.
+     Note that the array is reversed in place, and no copy is made.
+
+
+    */
+const array = [1,2,3,4,5,6,7]
+//console.log(array.reverse());// this reverse method changes the original array 
+                             //in any case if we dont wan to change the original array
+                             //then use toReversed()
+let reversed = array.toReversed();
+console.log(reversed);
+console.log(array); //original array is not effeced
+
+   }
+{
+    /**
+     JION()
+     SYNTAX: join()
+join(separator)
+A string with all array elements joined.
+ If array.length is 0, the empty string is returned.
+ The string conversions of all array elements are joined into one string. If an element is undefined or null, it is converted to an empty string instead of the string "null" or "undefined".
+
+
+     */
+
+ const array =[[ 1,2,3,4,5],[2,3,4,6]]
+ let jioned = array.join();
+ console.log(typeof(jioned));//string  here the array is converted to string and then combined
+
+console.log(array.join());//[1,2,3,4,5,2,3,4,6]
+
+
+
+
+}
+
+{
+    /**
+    Concat():Combine the two  array in and return a array original array is not effected
+    Syntax: concat()
+concat(value1)
+concat(value1, value2)
+concat(value1, value2,....valueN):
+
+
+
+
+     */
+
+const arr = [1,2,3,4,5,6]
+const arr1 =['sangram','ravi']
+
+console.log(arr.concat(arr1));//[ 1, 2, 3, 4, 5, 6, 'sangram', 'ravi' ]
+}
+
+/**
+ The find() method of Array instances returns the first element in the
+  provided array that satisfies the provided testing function.
+  If no values satisfy the testing function, undefined is returned.
+  syntax:find(callbackFn)
+find(callbackFn, thisArg)
+
+ */
