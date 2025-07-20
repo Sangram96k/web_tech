@@ -148,9 +148,28 @@ let ob2 ={
     Age:22,
     Gender:"male"
 }
+
+
 console.log(Object.keys(ob2));//[ 'name', 'Age', 'Gender' ]
 //if want to check the length of the obectj or number of properties in object 
 // then apply the length to the array that is returned by the 
 // Object.keys() method like below
 
 console.log(Object.keys(ob2).length);//3
+//Object.getOwnPropertyNames(obj)
+//This method returns an array of all own property names (keys)/not inherited of the object — whether enumerable or not.
+
+console.log(Object.getOwnPropertyNames(ob2));//[ 'name', 'Age', 'Gender' ]
+
+//if want specific property
+console.log(Object.getOwnPropertyDescriptor(ob2,"Age"));
+// out put
+/**
+ * value: 22 → the value of the property Age
+
+writable: true → you can change the value
+
+enumerable: true → it will show up in loops like for...in or Object.keys()
+
+configurable: true → you can delete or change the property's descriptor
+ */

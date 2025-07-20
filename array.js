@@ -310,3 +310,45 @@ console.log(arr.concat(arr1));//[ 1, 2, 3, 4, 5, 6, 'sangram', 'ravi' ]
 find(callbackFn, thisArg)
 
  */
+
+
+{
+
+/** ARRAY OBJECT */
+let students = [
+  { name: "Rahul", age: 22 },
+  { name: "Sneha", age: 21 },
+  { name: "Amit", age: 23 }
+];
+
+// ACCESSING THE OBJECT 
+//AS YOU KNOW WE CAN ACCESS THE ELEMENT IN THE ARRAY USING INDEXES SO
+//IF WE WANT TO ACCESS THE FIRST OJECT WE CAN ACCESS USING THE INDEX
+console.log(students[0]);//{ name: 'Rahul', age: 22 } firts object
+
+
+// NOW ITERATING OVER THE ARRAY OBJECT
+
+for(let student of students){    /*{ name: 'Rahul', age: 22 }
+                                { name: 'Rahul', age: 22 }
+                                { name: 'Sneha', age: 21 }
+                                { name: 'Amit', age: 23 } */                            
+    console.log(student);
+}
+
+
+// ALSO WE CAN ADD THE NEW OBJECT TO THE ARRAY USING THE 
+//ARRAY METHODS
+students.push({name:"sangram",age:22});
+console.log(students);
+
+//ALSO WE CAN UPDATE THE VALUE OF THE OBJECT 
+students[0].age=22
+console.log(students[0]);
+
+
+//CAN ALSO DELETE THE NEW ADD OBJECT LIKE THIS
+students.pop();
+
+console.log(students);
+}
