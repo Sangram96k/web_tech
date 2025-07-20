@@ -6,16 +6,19 @@ let count = 0;
 
 let inc = document.querySelector(".increase");
 inc.addEventListener('click',()=>{
-     info.textContent=count++;
+    count++;
+    info.textContent=count;
 })
 
 let dec = document.querySelector(".decrease").addEventListener('click',()=>{
-    info.textContent=count--;
+    count--;
+    info.textContent=count;
 
 })
 
 let res = document.querySelector('.reset').addEventListener('click',()=>{
-    info.textContent=0;
+    count=0;
+    return info.textContent=count;
 
     /**
      * Update the count variable in the reset
