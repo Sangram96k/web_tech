@@ -352,3 +352,53 @@ students.pop();
 
 console.log(students);
 }
+{
+
+    //FOREACH() METHOD: The forEach() method in JavaScript is used to execute a provided 
+    // callback function once for each element in an array, in order.
+
+
+    let arr = new Array(1,2,3,4,5)
+console.log(arr)
+    arr.forEach(element => {
+        console.log(element);
+    });
+let sum = 0;
+       function sumof(arr) {
+      arr.forEach((element)=>{
+      sum=sum+element;
+
+      })
+        return sum;
+       }
+
+       console.log(sumof(arr));
+
+
+// IN ARRAY WE CAN ALSO STORE THE FUNCTIONS SAME AS WE STORE THE OBJECTS
+       let newarr= [
+        function sum(a,b) {
+           return a+b;
+        },
+        function multi(a,b) {
+            return a*b;
+
+            
+        },
+        function div(a,b) {
+           if(a!=0){
+             return a/b;
+           }
+           return;
+
+            
+        }
+       ];
+
+console.log(newarr);
+       let first = newarr[0];
+       let second = newarr[1];
+       let sumfunc = first(1,2);
+       console.log("the sum is :",sumfunc);
+       console.log("the multiplication is :",second(2,3));
+}
