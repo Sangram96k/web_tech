@@ -10,9 +10,9 @@
 // Basically, if a variable or object is no longer accessible in our code,
 // JS will assume it’s useless and clean it up automatically.
 
-// ------------------------------
+// --------------------------
 // Example 1
-// ------------------------------
+// -------------------------
 
 let user = {
   name: "Sangram"
