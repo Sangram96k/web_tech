@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Interactive Guide to JavaScript Promises</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Chosen Palette: Calm Code (Background: #FDFDFD, Text: #334155, Accent: #3b82f6, Secondary: #e2e8f0) -->
+    <!-- Application Structure Plan: A single-page app with a sticky sidebar for navigation and a main content area. This topic-based navigation (Lifecycle, Chaining, Concurrency, etc.) is more user-friendly than a linear document, allowing users to jump to specific concepts. Key interactions include a concurrency playground and an event loop visualizer to transform abstract concepts into tangible, explorable demos, enhancing learning and retention. -->
+    <!-- Visualization & Content Choices: Report Info -> Promise States; Goal -> Inform; Viz -> Interactive HTML/CSS diagram; Interaction -> Click states for info. Report Info -> Concurrency Methods; Goal -> Compare; Viz -> Concurrency Playground (HTML/JS simulation); Interaction -> User runs simulations, sees live results. Report Info -> Event Loop; Goal -> Explain Change; Viz -> Animated HTML/JS diagram; Interaction -> User triggers animation, watches queues. This approach favors custom, interactive diagrams over static charts to better illustrate programming concepts. -->
+    <!-- CONFIRMATION: NO SVG graphics used. NO Mermaid JS used. -->
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: #FDFDFD;
+            color: #334155;
+        }
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code:wght@400;500&display=swap');
+        
+        .code-block {
+            font-family: 'Fira Code', monospace;
+            background-color: #1e293b;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            overflow-x: auto;
+            font-size: 0.875rem;
+        }
+        .console-output {
+            font-family: 'Fira Code', monospace;
+            background-color: #f1f5f9;
+            color: #1e293b;
+            padding: 1rem;
+            border-radius: 0.5rem;
+            margin-top: 0.5rem;
+            min-height: 50px;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+        .nav-link {
+            transition: all 0.2s ease-in-out;
+        }
+        .nav-link.active {
+            background-color: #3b82f6;
+            color: white;
+            font-weight: 600;
+        }
+        .nav-link:not(.active):hover {
+            background-color: #eef2ff;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+        .promise-bar {
+            height: 20px;
+            border-radius: 0.25rem;
+            background-color: #e2e8f0;
+            transition: width 0.3s ease-in-out;
+            width: 0%;
+        }
+        .promise-bar.fulfilled { background-color: #22c55e; }
+        .promise-bar.rejected { background-color: #ef4444; }
+
+        .event-loop-col {
+            border: 2px solid #e2e8f0;
+            border-radius: 0.5rem;
+            padding: 1rem;
+            min-height: 200px;
+        }
+        .event-loop-item {
+            background-color: #f1f5f9;
+            padding: 0.5rem;
+            border-radius: 0.25rem;
+            margin-bottom: 0.5rem;
+            text-align: center;
+            font-size: 0.875rem;
+            transition: all 0.5s ease;
+            opacity: 1;
+        }
+        .event-loop-item.microtask { border-left: 4px solid #3b82f6; }
+        .event-loop-item.macrotask { border-left: 4px solid #f97316; }
+        .event-loop-item.log { border-left: 4px solid #1e293b; }
+    </style>
+</head>
+<body class="antialiased">
+    <div class="flex flex-col md:flex-row min-h-screen">
+        <aside id="sidebar" class="w-full md:w-64 bg-white border-r border-slate-200 p-4 md:sticky md:top-0 md:h-screen">
+            <h1 class="text-2xl font-bold text-slate-800 mb-6">JS Promises</h1>
+            <nav class="flex flex-col space-y-2">
+                <a href="#introduction" class="nav-link p-2 rounded-md">Introduction</a>
+                <a href="#lifecycle" class="nav-link p-2 rounded-md">The Lifecycle</a>
+                <a href="#creation" class="nav-link p-2 rounded-md">Creating & Consuming</a>
+                <a href="#chaining" class="nav-link p-2 rounded-md">Promise Chaining</a>
+                <a href="#concurrency" class="nav-link p-2 rounded-md">Concurrency Playground</a>
+                <a href="#event-loop" class="nav-link p-2 rounded-md">Event Loop Visualizer</a>
+                <a href="#error-handling" class="nav-link p-2 rounded-md">Error Handling</a>
+                <a href="#best-practices" class="nav-link p-2 rounded-md">Best Practices</a>
+            </nav>
+        </aside>
+
+        <main class="flex-1 p-6 md:p-10">
+            
+            <section id="introduction" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">Addressing Asynchronicity</h2>
+                <p class="text-lg text-slate-600">JavaScript is single-threaded, meaning it can only do one thing at a time. Long operations like network requests would freeze the browser. Promises are objects that represent the eventual completion (or failure) of an asynchronous operation, allowing other code to run in the meantime.</p>
+                
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-white p-4 rounded-lg border border-red-200">
+                        <h3 class="font-semibold text-red-600 mb-2">The Problem: "Callback Hell"</h3>
+                        <p class="text-sm text-slate-600 mb-2">Before Promises, nested callbacks made code hard to read and maintain.</p>
+                        <div class="code-block text-xs">
+<pre>
+asyncOp1(function(result1){
+  asyncOp2(result1, function(result2){
+    asyncOp3(result2, function(result3){
+      // ...and so on
+    });
+  });
+});
+</pre>
+                        </div>
+                    </div>
+                    <div class="bg-white p-4 rounded-lg border border-green-200">
+                        <h3 class="font-semibold text-green-600 mb-2">The Solution: Promises</h3>
+                        <p class="text-sm text-slate-600 mb-2">Promises allow for cleaner, sequential-style code through chaining.</p>
+                        <div class="code-block text-xs">
+<pre>
+asyncOp1()
+  .then(result1 => asyncOp2(result1))
+  .then(result2 => asyncOp3(result2))
+  .then(result3 => {
+    // ...much cleaner!
+  })
+  .catch(error => console.error(error));
+</pre>
+                        </div>
+                    </div>
+                </div>
+                <p class="text-slate-600">Promises solve another issue called "Inversion of Control". Instead of passing a callback to a function and losing control over when it's called, Promises return an object. You decide when to react to its outcome by attaching `.then()` or `.catch()` handlers, giving you back control over your code's execution flow.</p>
+            </section>
+
+            <section id="lifecycle" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">The Promise Lifecycle</h2>
+                <p class="text-lg text-slate-600">A Promise exists in one of three states. Once it is "settled" (either fulfilled or rejected), its state can never change again. This immutability guarantees a consistent outcome.</p>
+                <div id="lifecycle-diagram" class="grid md:grid-cols-3 gap-4 text-center">
+                    <div id="state-pending" class="state-card border-2 border-blue-500 bg-blue-50 p-4 rounded-lg cursor-pointer transition-all duration-300 transform hover:scale-105">
+                        <h3 class="font-bold text-blue-800 text-xl">Pending</h3>
+                        <p class="text-sm text-blue-600">Initial State</p>
+                    </div>
+                    <div id="state-fulfilled" class="state-card border-2 border-slate-300 bg-white p-4 rounded-lg cursor-pointer transition-all duration-300 transform hover:scale-105">
+                        <h3 class="font-bold text-slate-800 text-xl">Fulfilled</h3>
+                        <p class="text-sm text-slate-500">Operation Succeeded</p>
+                    </div>
+                    <div id="state-rejected" class="state-card border-2 border-slate-300 bg-white p-4 rounded-lg cursor-pointer transition-all duration-300 transform hover:scale-105">
+                        <h3 class="font-bold text-slate-800 text-xl">Rejected</h3>
+                        <p class="text-sm text-slate-500">Operation Failed</p>
+                    </div>
+                </div>
+                <div id="lifecycle-explanation" class="bg-white p-6 rounded-lg border border-slate-200 min-h-[100px]">
+                    <p class="text-slate-700">Click on a state to learn more about it.</p>
+                </div>
+            </section>
+
+            <section id="creation" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">Creating & Consuming Promises</h2>
+                <p class="text-lg text-slate-600">You create a promise with the `new Promise` constructor. It takes an "executor" function with two arguments: `resolve` and `reject`. Call `resolve(value)` on success and `reject(reason)` on failure.</p>
+                
+                <div class="bg-white p-4 rounded-lg border border-slate-200">
+                    <h3 class="font-semibold text-slate-700 mb-2">Interactive Example</h3>
+                    <p class="text-sm text-slate-600 mb-4">This promise will randomly succeed or fail after 1 second. Click "Run" to see what happens. You can consume its result using `.then()` for success, `.catch()` for failure, and `.finally()` for cleanup.</p>
+                    <div class="code-block mb-4">
+<pre>
+const myPromise = new Promise((resolve, reject) => {
+  setTimeout(() => {
+    if (Math.random() > 0.5) {
+      resolve("✅ Success! Here is your data.");
+    } else {
+      reject(new Error("❌ Failure! Something went wrong."));
+    }
+  }, 1000);
+});
+
+myPromise
+  .then(result => {
+    // update output with result
+  })
+  .catch(error => {
+    // update output with error
+  })
+  .finally(() => {
+    // update output with cleanup message
+  });
+</pre>
+                    </div>
+                    <button id="run-creation-promise" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">
+                        Run Promise
+                    </button>
+                    <div id="creation-output" class="console-output">Click "Run Promise" to start...</div>
+                </div>
+            </section>
+
+            <section id="chaining" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">Promise Chaining</h2>
+                <p class="text-lg text-slate-600">The real power of promises comes from chaining. Since `.then()` and `.catch()` always return a new promise, you can chain them together to run asynchronous operations in sequence. This avoids "callback hell" and makes code much more readable.</p>
+                
+                <div class="bg-white p-4 rounded-lg border border-slate-200">
+                    <h3 class="font-semibold text-slate-700 mb-2">Chaining Example</h3>
+                    <p class="text-sm text-slate-600 mb-4">This example simulates a multi-step process. Each step is a promise that resolves after a short delay. Notice how the result from one step is passed to the next. Crucially, each `.then()` handler must `return` a value or another promise for the chain to work.</p>
+                    <button id="run-chaining-promise" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">
+                        Start Chain
+                    </button>
+                    <div id="chaining-output" class="console-output">Click "Start Chain" to begin...</div>
+                </div>
+            </section>
+
+            <section id="concurrency" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">Concurrency Playground</h2>
+                <p class="text-lg text-slate-600">JavaScript provides static methods to handle multiple promises at once. Use this playground to see how they differ. Each "promise" below will resolve or reject after a random time. Click "Run" to see the outcome for each method.</p>
+                
+                <div class="bg-white p-6 rounded-lg border border-slate-200">
+                    <div class="mb-4">
+                        <h3 class="font-semibold">Simulated Promises:</h3>
+                        <div id="concurrency-promises-display" class="space-y-2 mt-2"></div>
+                    </div>
+                    
+                    <div class="flex space-x-2 border-b border-slate-200 mb-4">
+                        <button class="concurrency-tab active-tab py-2 px-4 font-medium" data-method="all">Promise.all()</button>
+                        <button class="concurrency-tab py-2 px-4 font-medium" data-method="allSettled">Promise.allSettled()</button>
+                        <button class="concurrency-tab py-2 px-4 font-medium" data-method="any">Promise.any()</button>
+                        <button class="concurrency-tab py-2 px-4 font-medium" data-method="race">Promise.race()</button>
+                    </div>
+                    
+                    <div id="concurrency-explanation" class="mb-4 text-slate-600"></div>
+
+                    <button id="run-concurrency" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">Run</button>
+                    <button id="reset-concurrency" class="bg-slate-500 hover:bg-slate-600 text-white font-bold py-2 px-4 rounded transition-colors">Reset</button>
+                    
+                    <div id="concurrency-output" class="console-output">Click "Run" to start the simulation.</div>
+                </div>
+            </section>
+            
+            <section id="event-loop" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">Event Loop Visualizer</h2>
+                <p class="text-lg text-slate-600">Promise handlers (`.then`, `.catch`) don't run immediately. They are placed in a high-priority "Microtask Queue" and are executed after the current synchronous code finishes, but before lower-priority "Macrotasks" (like `setTimeout`). This visualizer demonstrates the execution order.</p>
+                
+                <div class="bg-white p-6 rounded-lg border border-slate-200">
+                    <div class="code-block mb-4 text-sm">
+<pre>
+console.log('Start');
+
+setTimeout(() => {
+  console.log('Macrotask (setTimeout)');
+}, 0);
+
+Promise.resolve().then(() => {
+  console.log('Microtask 1 (Promise)');
+});
+
+Promise.resolve().then(() => {
+  console.log('Microtask 2 (Promise)');
+});
+
+console.log('End');
+</pre>
+                    </div>
+                    <button id="run-event-loop" class="bg-blue-500 hover:bg-blue-600 text-white font-bold py-2 px-4 rounded transition-colors">Run Visualization</button>
+                    
+                    <div class="grid md:grid-cols-4 gap-4 mt-6">
+                        <div class="event-loop-col">
+                            <h3 class="font-semibold text-center mb-2">Call Stack</h3>
+                            <div id="call-stack-col"></div>
+                        </div>
+                        <div class="event-loop-col">
+                            <h3 class="font-semibold text-center mb-2">Microtask Queue</h3>
+                            <div id="microtask-col"></div>
+                        </div>
+                        <div class="event-loop-col">
+                            <h3 class="font-semibold text-center mb-2">Macrotask Queue</h3>
+                            <div id="macrotask-col"></div>
+                        </div>
+                        <div class="event-loop-col bg-slate-800 text-white">
+                             <h3 class="font-semibold text-center mb-2">Console Log</h3>
+                            <div id="log-col" class="font-mono text-sm"></div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <section id="error-handling" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">Robust Error Handling</h2>
+                <p class="text-lg text-slate-600">Promises provide a powerful and centralized way to handle errors. An error in any part of a promise chain (either from a `reject()` call or a thrown exception) will propagate down to the nearest `.catch()` handler.</p>
+                <div class="bg-white p-4 rounded-lg border border-slate-200">
+                    <p class="text-slate-600 mb-4">This "invisible `try...catch`" wraps your code, ensuring both synchronous and asynchronous errors are handled consistently. You can use a single `.catch()` at the end of a chain to manage all potential failures.</p>
+                    <div class="code-block">
+<pre>
+fetch('invalid-url') // This will fail
+  .then(response => response.json()) // This won't run
+  .then(data => {
+    console.log(data.nonExistentProperty.value); // This would also throw an error
+  })
+  .catch(error => {
+    // This single catch block handles all the errors above!
+    console.error("Caught an error:", error.message);
+  });
+</pre>
+                    </div>
+                    <p class="mt-4 text-slate-600">If a promise is rejected and has no `.catch()` handler, it becomes an "unhandled rejection," which is bad practice and will log an error to the browser console.</p>
+                </div>
+            </section>
+
+            <section id="best-practices" class="content-section space-y-6">
+                <h2 class="text-3xl font-bold text-slate-800">Best Practices & Common Pitfalls</h2>
+                <p class="text-lg text-slate-600">Following a few key principles will help you write clean and robust promise-based code.</p>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+                        <h3 class="font-semibold text-green-800 mb-2">Do This ✅</h3>
+                        <ul class="list-disc list-inside space-y-2 text-green-700 text-sm">
+                            <li><strong>Always `return`</strong> in `.then()` handlers to pass values down the chain.</li>
+                            <li>Keep chains <strong>flat and readable</strong>. Avoid nesting promises.</li>
+                            <li>Use a single <strong>`.catch()` at the end</strong> of your chain for centralized error handling.</li>
+                            <li>Reject with `new Error()` objects, not strings, to get stack traces.</li>
+                            <li>Use `async/await` for cleaner syntax when possible.</li>
+                            <li>Use `.finally()` for cleanup code (e.g., hiding a loading spinner).</li>
+                        </ul>
+                    </div>
+                    <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+                        <h3 class="font-semibold text-red-800 mb-2">Avoid This ❌</h3>
+                        <ul class="list-disc list-inside space-y-2 text-red-700 text-sm">
+                            <li>Forgetting to `return`, which breaks the chain ("floating promises").</li>
+                            <li>Not having a `.catch()` handler ("unhandled rejections").</li>
+                            <li>Wrapping promise chains in `try...catch` (it doesn't work for async errors without `await`).</li>
+                            <li>Throwing errors inside a `setTimeout` without calling `reject()`.</li>
+                        </ul>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const sections = document.querySelectorAll('.content-section');
+            const navLinks = document.querySelectorAll('.nav-link');
+
+            function updateContent(hash) {
+                const targetHash = hash || window.location.hash || '#introduction';
+                
+                sections.forEach(section => {
+                    if ('#' + section.id === targetHash) {
+                        section.classList.add('active');
+                    } else {
+                        section.classList.remove('active');
+                    }
+                });
+
+                navLinks.forEach(link => {
+                    if (link.getAttribute('href') === targetHash) {
+                        link.classList.add('active');
+                    } else {
+                        link.classList.remove('active');
+                    }
+                });
+            }
+
+            navLinks.forEach(link => {
+                link.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    const targetHash = e.currentTarget.getAttribute('href');
+                    history.pushState(null, null, targetHash);
+                    updateContent(targetHash);
+                });
+            });
+            
+            window.addEventListener('popstate', () => updateContent(window.location.hash));
+            updateContent();
+
+            initLifecycleDiagram();
+            initCreationPromise();
+            initChainingPromise();
+            initConcurrencyPlayground();
+            initEventLoopVisualizer();
+        });
+
+        function initLifecycleDiagram() {
+            const diagram = document.getElementById('lifecycle-diagram');
+            const cards = diagram.querySelectorAll('.state-card');
+            const explanation = document.getElementById('lifecycle-explanation');
+            const explanations = {
+                'state-pending': {
+                    title: 'Pending',
+                    text: 'This is the initial state of a Promise. The asynchronous operation has not yet completed. The promise is neither fulfilled nor rejected; it\'s "in flight".',
+                    color: 'blue'
+                },
+                'state-fulfilled': {
+                    title: 'Fulfilled',
+                    text: 'The operation completed successfully. The promise now has a fulfillment value, which is passed to any `.then()` handlers. This is a terminal state.',
+                    color: 'green'
+                },
+                'state-rejected': {
+                    title: 'Rejected',
+                    text: 'The operation failed. The promise now has a rejection reason (usually an Error object), which is passed to any `.catch()` handlers. This is also a terminal state.',
+                    color: 'red'
+                }
+            };
+
+            cards.forEach(card => {
+                card.addEventListener('click', () => {
+                    const stateId = card.id;
+                    const stateInfo = explanations[stateId];
+
+                    cards.forEach(c => {
+                        c.className = 'state-card border-2 border-slate-300 bg-white p-4 rounded-lg cursor-pointer transition-all duration-300 transform hover:scale-105';
+                    });
+
+                    card.className = `state-card border-2 border-${stateInfo.color}-500 bg-${stateInfo.color}-50 p-4 rounded-lg cursor-pointer transition-all duration-300 transform scale-105`;
+                    explanation.innerHTML = `<h4 class="font-bold text-${stateInfo.color}-800 mb-2">${stateInfo.title}</h4><p class="text-slate-700">${stateInfo.text}</p>`;
+                });
+            });
+        }
+
+        function initCreationPromise() {
+            const runBtn = document.getElementById('run-creation-promise');
+            const outputDiv = document.getElementById('creation-output');
+
+            runBtn.addEventListener('click', () => {
+                outputDiv.innerHTML = 'Promise is pending...';
+                runBtn.disabled = true;
+
+                const myPromise = new Promise((resolve, reject) => {
+                    setTimeout(() => {
+                        if (Math.random() > 0.5) {
+                            resolve("✅ Success! Here is your data.");
+                        } else {
+                            reject(new Error("❌ Failure! Something went wrong."));
+                        }
+                    }, 1000);
+                });
+
+                myPromise
+                    .then(result => {
+                        outputDiv.innerHTML = `<span class="text-green-600">${result}</span>`;
+                    })
+                    .catch(error => {
+                        outputDiv.innerHTML = `<span class="text-red-600">${error.message}</span>`;
+                    })
+                    .finally(() => {
+                        outputDiv.innerHTML += '<br>🧹 Cleanup complete. Promise settled.';
+                        runBtn.disabled = false;
+                    });
+            });
+        }
+
+        function initChainingPromise() {
+            const runBtn = document.getElementById('run-chaining-promise');
+            const outputDiv = document.getElementById('chaining-output');
+
+            const step1 = () => new Promise(resolve => setTimeout(() => resolve('Step 1: Fetched user'), 500));
+            const step2 = (prevResult) => new Promise(resolve => setTimeout(() => resolve(`${prevResult} -> Step 2: Fetched posts`), 500));
+            const step3 = (prevResult) => new Promise(resolve => setTimeout(() => resolve(`${prevResult} -> Step 3: Fetched comments`), 500));
+
+            runBtn.addEventListener('click', () => {
+                outputDiv.innerHTML = 'Starting chain...';
+                runBtn.disabled = true;
+
+                step1()
+                    .then(result => {
+                        outputDiv.innerHTML = result;
+                        return step2(result);
+                    })
+                    .then(result => {
+                        outputDiv.innerHTML = result;
+                        return step3(result);
+                    })
+                    .then(result => {
+                        outputDiv.innerHTML = `${result} -> ✅ Chain complete!`;
+                    })
+                    .catch(error => {
+                        outputDiv.innerHTML = `<span class="text-red-600">Chain failed: ${error.message}</span>`;
+                    })
+                    .finally(() => {
+                        runBtn.disabled = false;
+                    });
+            });
+        }
+        
+        function initConcurrencyPlayground() {
+            const runBtn = document.getElementById('run-concurrency');
+            const resetBtn = document.getElementById('reset-concurrency');
+            const outputDiv = document.getElementById('concurrency-output');
+            const promisesContainer = document.getElementById('concurrency-promises-display');
+            const tabs = document.querySelectorAll('.concurrency-tab');
+            const explanationDiv = document.getElementById('concurrency-explanation');
+            let activeMethod = 'all';
+            let promises = [];
+
+            const explanations = {
+                all: '<strong>Promise.all()</strong>: Fulfills when <strong>all</strong> promises fulfill. Rejects as soon as <strong>any</strong> promise rejects (fail-fast).',
+                allSettled: '<strong>Promise.allSettled()</strong>: Fulfills when <strong>all</strong> promises have settled (either fulfilled or rejected). It never rejects.',
+                any: '<strong>Promise.any()</strong>: Fulfills as soon as <strong>any</strong> promise fulfills. Rejects only if <strong>all</strong> promises reject.',
+                race: '<strong>Promise.race()</strong>: Settles (fulfills or rejects) as soon as <strong>any</strong> promise settles. It\'s a race to the first completion, success or failure.'
+            };
+
+            function setupPromises() {
+                promisesContainer.innerHTML = '';
+                promises = [
+                    { name: 'Promise A', time: Math.random() * 1500 + 500, fails: Math.random() > 0.8 },
+                    { name: 'Promise B', time: Math.random() * 1500 + 500, fails: Math.random() > 0.8 },
+                    { name: 'Promise C', time: Math.random() * 1500 + 500, fails: Math.random() > 0.8 },
+                ];
+
+                promises.forEach((p, i) => {
+                    const promiseEl = document.createElement('div');
+                    promiseEl.className = 'flex items-center space-x-2';
+                    promiseEl.innerHTML = `
+                        <span class="w-24 text-sm">${p.name}</span>
+                        <div class="flex-1 bg-slate-200 rounded-full h-5">
+                            <div id="bar-${i}" class="promise-bar"></div>
+                        </div>
+                        <span class="w-20 text-xs text-slate-500">${p.time.toFixed(0)}ms, ${p.fails ? 'fails' : 'succeeds'}</span>
+                    `;
+                    promisesContainer.appendChild(promiseEl);
+                });
+            }
+            
+            function switchTab(method) {
+                activeMethod = method;
+                tabs.forEach(tab => {
+                    if (tab.dataset.method === method) {
+                        tab.classList.add('active-tab', 'text-blue-600', 'border-b-2', 'border-blue-600');
+                        tab.classList.remove('text-slate-500');
+                    } else {
+                        tab.classList.remove('active-tab', 'text-blue-600', 'border-b-2', 'border-blue-600');
+                        tab.classList.add('text-slate-500');
+                    }
+                });
+                explanationDiv.innerHTML = explanations[method];
+            }
+
+            tabs.forEach(tab => tab.addEventListener('click', () => switchTab(tab.dataset.method)));
+
+            runBtn.addEventListener('click', () => {
+                runBtn.disabled = true;
+                resetBtn.disabled = true;
+                outputDiv.textContent = 'Running...';
+
+                const promiseInstances = promises.map((p, i) => {
+                    const bar = document.getElementById(`bar-${i}`);
+                    return new Promise((resolve, reject) => {
+                        setTimeout(() => {
+                            bar.style.width = '100%';
+                            if (p.fails) {
+                                bar.classList.add('rejected');
+                                reject(`${p.name} rejected`);
+                            } else {
+                                bar.classList.add('fulfilled');
+                                resolve(`${p.name} fulfilled`);
+                            }
+                        }, p.time);
+                    });
+                });
+
+                const startTime = Date.now();
+                Promise[activeMethod](promiseInstances)
+                    .then(result => {
+                        const duration = Date.now() - startTime;
+                        outputDiv.innerHTML = `<span class="text-green-600">Fulfilled after ${duration.toFixed(0)}ms:</span><br>${JSON.stringify(result, null, 2)}`;
+                    })
+                    .catch(error => {
+                        const duration = Date.now() - startTime;
+                        outputDiv.innerHTML = `<span class="text-red-600">Rejected after ${duration.toFixed(0)}ms:</span><br>${JSON.stringify(error, null, 2)}`;
+                    })
+                    .finally(() => {
+                        runBtn.disabled = false;
+                        resetBtn.disabled = false;
+                    });
+            });
+
+            resetBtn.addEventListener('click', () => {
+                outputDiv.textContent = 'Click "Run" to start the simulation.';
+                setupPromises();
+            });
+
+            setupPromises();
+            switchTab('all');
+        }
+
+        function initEventLoopVisualizer() {
+            const runBtn = document.getElementById('run-event-loop');
+            const callStackCol = document.getElementById('call-stack-col');
+            const microtaskCol = document.getElementById('microtask-col');
+            const macrotaskCol = document.getElementById('macrotask-col');
+            const logCol = document.getElementById('log-col');
+
+            const sleep = (ms) => new Promise(resolve => setTimeout(resolve, ms));
+
+            const createItem = (text, type) => {
+                const el = document.createElement('div');
+                el.textContent = text;
+                el.className = `event-loop-item ${type}`;
+                return el;
+            };
+
+            runBtn.addEventListener('click', async () => {
+                runBtn.disabled = true;
+                callStackCol.innerHTML = '';
+                microtaskCol.innerHTML = '';
+                macrotaskCol.innerHTML = '';
+                logCol.innerHTML = '';
+
+                // 1. console.log('Start')
+                let item = createItem("console.log('Start')", 'log');
+                callStackCol.appendChild(item);
+                await sleep(700);
+                logCol.appendChild(item);
+                await sleep(300);
+                callStackCol.innerHTML = '';
+                
+                // 2. setTimeout
+                item = createItem("setTimeout", 'macrotask');
+                callStackCol.appendChild(item);
+                await sleep(700);
+                macrotaskCol.appendChild(createItem("Callback", 'macrotask'));
+                await sleep(300);
+                callStackCol.innerHTML = '';
+
+                // 3. Promise.then 1
+                item = createItem("Promise.then 1", 'microtask');
+                callStackCol.appendChild(item);
+                await sleep(700);
+                microtaskCol.appendChild(createItem("Callback 1", 'microtask'));
+                await sleep(300);
+                callStackCol.innerHTML = '';
+
+                // 4. Promise.then 2
+                item = createItem("Promise.then 2", 'microtask');
+                callStackCol.appendChild(item);
+                await sleep(700);
+                microtaskCol.appendChild(createItem("Callback 2", 'microtask'));
+                await sleep(300);
+                callStackCol.innerHTML = '';
+
+                // 5. console.log('End')
+                item = createItem("console.log('End')", 'log');
+                callStackCol.appendChild(item);
+                await sleep(700);
+                logCol.appendChild(item);
+                await sleep(300);
+                callStackCol.innerHTML = '';
+                
+                await sleep(500); // Pause before processing queues
+
+                // Process Microtasks
+                let microtasks = Array.from(microtaskCol.children);
+                for (const task of microtasks) {
+                    callStackCol.appendChild(task);
+                    await sleep(700);
+                    logCol.appendChild(createItem(task.textContent === 'Callback 1' ? 'Microtask 1 (Promise)' : 'Microtask 2 (Promise)', 'log'));
+                    await sleep(300);
+                    callStackCol.innerHTML = '';
+                }
+                microtaskCol.innerHTML = '';
+
+                await sleep(500); // Pause
+
+                // Process Macrotasks
+                let macrotasks = Array.from(macrotaskCol.children);
+                for (const task of macrotasks) {
+                    callStackCol.appendChild(task);
+                    await sleep(700);
+                    logCol.appendChild(createItem('Macrotask (setTimeout)', 'log'));
+                    await sleep(300);
+                    callStackCol.innerHTML = '';
+                }
+                macrotaskCol.innerHTML = '';
+
+                runBtn.disabled = false;
+            });
+        }
+    </script>
+</body>
+</html>

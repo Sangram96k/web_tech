@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+
+    <style>
+
+        .color{
+            background-color: red;
+            color: black;
+        }
+    </style>
+</head>
+<body>
+<p id="btn" style="font-size: 25px;">Helo</p>
+    <button  onclick="Increase()">Increase</button>
+
+    <script >
+        function Increase(){
+            let btn = document.getElementById("btn");
+            btn.classList.add("color");
+
+        }
+    </script>
+</body>
+</html>
